@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0d13">
+  <title>Dragon Detector · Release flasher</title>
+  <link rel="icon" href="assets/logo.png">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header><a class="brand" href="./"><img src="assets/logo.png" alt="">Dragon Detector</a><a href="https://github.com/valleytechsolutions/Dragon-Detector/releases">GitHub Releases ↗</a></header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">VALLEYTECH · GITHUB RELEASE FLASHER</p>
+      <h1>Your board.<br><span>The official release.</span></h1>
+      <p class="lede">Install Dragon Detector and set its clock over USB. Choose the exact model printed on your device.</p>
+      <p id="release">Checking release…</p>
+    </section>
+    <section class="installer" aria-labelledby="install-heading">
+      <h2 id="install-heading">Install firmware</h2>
+      <label for="board">Hardware model</label>
+      <select id="board" disabled><option value="">Choose your hardware</option></select>
+      <div id="details" class="details" hidden><h3 id="board-name"></h3><p id="board-detail"></p></div>
+      <label for="mode">Installation</label>
+      <select id="mode" disabled>
+        <option value="update">Update Dragon Detector · preserve saved data</option>
+        <option value="factory">Fresh installation · erase saved data</option>
+      </select>
+      <p id="mode-help" class="muted">Use Fresh installation when changing firmware or correcting a wrong board image.</p>
+      <label class="check"><input id="confirm" type="checkbox" disabled><span id="confirm-text">Confirm the model printed on your board.</span></label>
+      <label class="check"><input id="auto-clock" type="checkbox" checked><span>Set and verify date, time and timezone after installation</span></label>
+      <button id="install" disabled>Connect and install</button>
+      <p id="status" role="status" aria-live="polite">Choose a board to check its firmware.</p>
+      <div class="links"><a id="download" hidden>Download release package ↗</a><a id="checksums" hidden>File checksums</a></div>
+      <p id="browser-help" class="muted" hidden>USB installation needs desktop Chrome or Edge. Open this page directly in one of those browsers.</p>
+    </section>
+    <section class="support">
+      <div><h2>Set the clock</h2><p>Choose your model above and connect the running device. Its identity and clock are checked over USB.</p><button id="sync" class="secondary" disabled>Connect and sync clock</button></div>
+      <div><h2>Connection help</h2><p>Use a USB data cable and close other serial monitors. For a blank StopWatch after flashing, unplug USB, double-press its small power button to turn it off, then press once to start it and reconnect USB.</p><p><a href="https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers">CP210x driver ↗</a> · <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html">WCH USB driver ↗</a></p></div>
+    </section>
+    <details><summary>Release source and supported hardware</summary><p>Firmware comes from the latest published Dragon Detector GitHub release. The site checks for updates every 30 minutes. Each package and installer file is checked against its SHA-256 checksum before publication.</p><p>The P4 Knob uses its existing flasher. Guition beta and Tuya T5-E1 downloads are available through the main site until they have GitHub release packages.</p><p><a href="https://valleytech-dragon-detector.pages.dev/#hardware">Hardware details and purchase links ↗</a> · <a href="https://valleytech-dragon-detector.pages.dev/">Main flasher, Badge Studio and theme creator ↗</a></p></details>
+  </main>
+  <footer><a href="https://github.com/valleytechsolutions/Dragon-Detector-Flasher">Flasher source</a><span id="updated"></span></footer>
+  <noscript>Enable JavaScript to select your board and use the USB installer.</noscript>
+</body>
+</html>
