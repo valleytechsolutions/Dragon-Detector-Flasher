@@ -52,6 +52,11 @@ async function checkSelection() {
   const profile = boardProfiles[selected.id];
   $('board-name').textContent = selected.name;
   $('board-detail').textContent = [profile?.size ? profile.size + ' × ' + profile.size : '', profile?.display, selected.flash_mb + ' MB flash'].filter(Boolean).join(' · ');
+  $('board-note').textContent = selected.id === 'stopwatch'
+    ? 'StopWatch C152 has yellow and blue buttons. This is the 466 × 466 AMOLED model.'
+    : selected.id === 'm5dial'
+      ? 'Dial has a rotary ring and a 240 × 240 LCD. For the yellow-and-blue-button StopWatch, select StopWatch C152.'
+      : '';
   $('confirm-text').textContent = 'My device is ' + selected.name + '.';
   $('download').href = selected.archive_url;
   $('checksums').href = selected.path + '/SHA256SUMS.txt';
@@ -113,6 +118,9 @@ $('install').addEventListener('click', async () => {
     dialog.port = port;
     dialog.installMode = mode;
     dialog.autoClock = autoClock;
+    dialog.expectedManifest = selected.manifests[mode];
+    dialog.expectedFlashMB = selected.flash_mb;
+    dialog.boardName = selected.name;
     dialog.manifestPath = selected.path + '/' + mode + '.json';
     dialog.addEventListener('closed', async () => {
       const succeeded = dialog.installSucceeded;

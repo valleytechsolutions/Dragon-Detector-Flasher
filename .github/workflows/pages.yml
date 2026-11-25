@@ -22,6 +22,8 @@ jobs:
           python-version: '3.12'
       - name: Check package validation
         run: python -m unittest discover -s tests -v
+      - name: Check hardware mismatch protection
+        run: node tests/hardware-check.mjs
       - name: Prepare latest official release
         id: build
         run: python tools/build_site.py --published https://valleytechsolutions.github.io/Dragon-Detector-Flasher/

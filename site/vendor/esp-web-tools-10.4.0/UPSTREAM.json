@@ -34,5 +34,8 @@
     "stub_flasher_8266-CQFcqJ_a.js": "7ca214be908aacff37fd937188f55042c9aeae8af30da7141d634ef68778fc79",
     "styles-sT2V1cOw.js": "ad32b41ad8507aed4f7241178d9a472457355ecf0282faaa655de3ea37809c9a"
   },
-  "modifications": "None. Prebundled dist/web files and LICENSE copied byte-for-byte."
+  "modifications": "install-dialog-im156JnI.js invokes the manifest beforeFlash hook after ROM chip identification and before preparing, erasing or writing. On failure it reports the error, resets and disconnects. All other files are unchanged.",
+  "modified_files_sha256": {
+    "install-dialog-im156JnI.js": "f6c15e5a8d7999c8ee98ef158736058eb6e48efaa699864767971ef5dddb094a"
+  }
 }
