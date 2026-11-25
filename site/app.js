@@ -3,6 +3,7 @@ import {clockInstallDialogClass} from './clock-install-dialog.js';
 import {completeInstallSession, syncInstalledClock} from './install-clock.js';
 import {clockResultText} from './clock-verification.js';
 import {boardProfiles, validateManifest} from './board-profiles.js';
+import {resourceSetup} from './sd-resources.js';
 
 const $ = id => document.getElementById(id);
 customElements.define('release-install-dialog', clockInstallDialogClass(installerModule.EwtInstallDialog));
@@ -44,6 +45,7 @@ async function checkSelection() {
   $('confirm').checked = false;
   $('details').hidden = !selection;
   $('download').hidden = $('checksums').hidden = !selection;
+  $('sd-help').hidden = true;
   controls();
   if (!selection) return status('Choose a board to check its firmware.');
   const selected = selection;
@@ -66,6 +68,14 @@ async function checkSelection() {
     if (profile) validateManifest(manifest, selected.id, mode);
     if (JSON.stringify(manifest) !== JSON.stringify(selected.manifests[mode])) {
       throw new Error('Release changed during loading. Reload this page before installing.');
+    }
+    const sd = resourceSetup(selected.id, manifest);
+    if (sd && generation === attempt) {
+      const link = document.createElement('a');
+      link.href = sd.path;
+      link.textContent = 'Download SD resource pack';
+      $('sd-help').replaceChildren(sd.title + '. ' + sd.instructions + ' ', link);
+      $('sd-help').hidden = false;
     }
     await Promise.all(manifest.builds[0].parts.map(async part => {
       const file = await fetch(selected.path + '/' + part.path, {signal});

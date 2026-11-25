@@ -69,8 +69,6 @@ def unpack(blob, digest, board, version, destination):
             build = manifest["builds"][0]
             if build["chipFamily"] != "ESP32-S3":
                 raise ValueError(f"{board}: unsupported processor")
-            if manifest.get("sdResources", {}).get("required"):
-                raise ValueError(f"{board}: required external SD pack needs packaging")
             occupied = []
             names = set()
             for part in build["parts"]:
@@ -97,14 +95,14 @@ def unpack(blob, digest, board, version, destination):
             (destination / name).write_bytes(data)
         for entry in entries:
             name = entry.filename
-            if name.endswith((".txt", ".json")):
+            if not name.endswith((".bin", ".zip")):
                 (destination / name).write_bytes(archive.read(name))
         return {
             "id": board, "name": info["name"], "version": version,
             "flash_mb": info["flash_size"] // MIB,
             "application_sha256": checksums["firmware.bin"],
             "files": {name: hashlib.sha256(data).hexdigest() for name, data in payloads.items()},
-            "manifests": manifests,
+            "manifests": manifests, "source_commit": info.get("source_commit"),
         }
 
 
@@ -150,7 +148,30 @@ def build(output, published=None):
 
     with ThreadPoolExecutor(max_workers=3) as pool:
         boards = list(pool.map(prepare, sorted(packages)))
-    catalog = dict(identity, release_url=f"{RELEASES}/tag/{tag}", boards=boards,
+    resources = {}
+    for board in boards:
+        resource = board["manifests"]["update"].get("sdResources")
+        if not resource:
+            continue
+        path, commit = resource["path"], board["source_commit"]
+        if (not re.fullmatch(r"resources/[a-zA-Z0-9_.-]+\.zip", path)
+                or not re.fullmatch(r"[0-9a-f]{40}", commit or "")):
+            raise ValueError("Invalid pinned SD resource location")
+        raw = f"https://raw.githubusercontent.com/valleytechsolutions/Dragon-Detector/{commit}/web/"
+        resource_sums = sums(download(raw + "resources/SHA256SUMS.txt", MIB))
+        name = path.split("/")[-1]
+        digest = resource_sums[name]
+        if path in resources:
+            if resources[path] != digest:
+                raise ValueError("Conflicting SD resource versions")
+            continue
+        data = download(raw + path)
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise ValueError("SD resource checksum mismatch")
+        (output / path).parent.mkdir(exist_ok=True)
+        (output / path).write_bytes(data)
+        resources[path] = digest
+    catalog = dict(identity, release_url=f"{RELEASES}/tag/{tag}", boards=boards, resources=resources,
                    checked_at=datetime.now(timezone.utc).isoformat())
     (output / "catalog.json").write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
     print(f"Prepared {len(boards)} board packages from {tag}")
