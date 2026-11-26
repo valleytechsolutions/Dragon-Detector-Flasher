@@ -16,6 +16,8 @@ Firmware comes from the published release files. The P4 Knob is excluded. Models
 
 The flasher uses ESP Web Tools 10.4.0 and the existing Dragon Detector USB clock protocol. The installer and protocol modules retain their upstream notices. Release packages include their own license files.
 
+[Download SD card files](https://valleytechsolutions.github.io/Dragon-Detector-Flasher/#sd-files). The page groups resource packs by the board manifests in the current release, and links the separate P4 starter pack. Extract the matching ZIP to a FAT32 card with its folder structure intact.
+
 To check the packager locally, use Python 3.12 or later.
 
 ```sh

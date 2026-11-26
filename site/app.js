@@ -177,6 +177,27 @@ try {
     const option = new Option(board.name, board.id);
     $('board').add(option);
   }
+  const packs = new Map();
+  for (const board of catalog.boards) {
+    const resource = board.manifests.update.sdResources;
+    if (!resource || !catalog.resources?.[resource.path]) continue;
+    if (!packs.has(resource.path)) packs.set(resource.path, []);
+    packs.get(resource.path).push(board.name);
+  }
+  $('sd-downloads').replaceChildren();
+  for (const [path, names] of packs) {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = path;
+    link.download = path.split('/').pop();
+    link.textContent = 'Download SD resource pack ZIP';
+    const models = document.createElement('p');
+    models.className = 'muted';
+    models.textContent = names.join(' · ');
+    item.append(link, models);
+    $('sd-downloads').append(item);
+  }
+  if (!packs.size) $('sd-downloads').textContent = 'This release has no separate SD resource packs.';
   $('updated').textContent = 'Release checked ' + new Date(catalog.checked_at).toLocaleString();
   const requested = new URLSearchParams(location.search).get('board');
   if (catalog.boards.some(b => b.id === requested)) {
@@ -187,4 +208,5 @@ try {
 } catch (error) {
   status(error.message, true);
   $('release').textContent = 'Release unavailable';
+  $('sd-downloads').textContent = 'Resource list unavailable. Reload the page to check the current release.';
 }
