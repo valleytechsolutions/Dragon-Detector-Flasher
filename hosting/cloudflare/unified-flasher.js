@@ -12,8 +12,10 @@
     ? new URL('companion', current)
     : new URL('https://valleytechsolutions.github.io/Dragon-Detector-Flasher/');
   destination.search = current.search;
+  if (!companion) destination.searchParams.set('ui', 'release-20261126');
   destination.hash = companion ? companions.get(current.hash) || '#install'
     : current.hash === '#clock-sync-panel' ? '#clock'
+    : ['#sd-files', '#resources'].includes(current.hash) ? '#sd-files'
     : ['#esp32-drivers', '#connection-help'].includes(current.hash) ? '#connection-help' : '';
   location.replace(destination.href);
 })();
