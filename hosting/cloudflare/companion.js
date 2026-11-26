@@ -1,5 +1,5 @@
 (() => {
-  const release = 'https://valleytechsolutions.github.io/Dragon-Detector-Flasher/';
+  const release = 'https://valleytechsolutions.github.io/Dragon-Detector-Flasher/?ui=release-20261126';
   function view() {
     document.documentElement.dataset.companionView = location.hash === '#install' ? 'beta' : 'editor';
   }
