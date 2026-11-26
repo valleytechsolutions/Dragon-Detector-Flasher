@@ -51,12 +51,14 @@ async function checkSelection() {
   const selected = selection;
   const profile = boardProfiles[selected.id];
   $('board-name').textContent = selected.name;
-  $('board-detail').textContent = [profile?.size ? profile.size + ' × ' + profile.size : '', profile?.display, selected.flash_mb + ' MB flash'].filter(Boolean).join(' · ');
+  $('board-detail').textContent = [profile?.size ? profile.size + ' × ' + (profile.height ?? profile.size) : '', profile?.display, selected.flash_mb + ' MB flash'].filter(Boolean).join(' · ');
   $('board-note').textContent = selected.id === 'stopwatch'
     ? 'StopWatch C152 has yellow and blue buttons. This is the 466 × 466 AMOLED model.'
     : selected.id === 'm5dial'
       ? 'Dial has a rotary ring and a 240 × 240 LCD. For the yellow-and-blue-button StopWatch, select StopWatch C152.'
-      : '';
+      : selected.id === 'waveshare_206'
+        ? 'Preview for the rectangular AMOLED 2.06. Physical validation is pending.'
+        : '';
   $('confirm-text').textContent = 'My device is ' + selected.name + '.';
   $('download').href = selected.archive_url;
   $('checksums').href = selected.path + '/SHA256SUMS.txt';

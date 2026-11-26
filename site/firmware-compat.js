@@ -1,7 +1,8 @@
 import {firmwareAtLeast,knownFirmware} from './firmware-version.js?v=0.14.9';
 // Only protocol versions with a known compatible USB contract are accepted.
 export function parseBadgeInfo(line){
-  const match=/^BADGE_INFO (0\.(?:[3456789]|10|11|12|13|14)\.\d+) (240|360|412|466|480) (READY|RADAR_ONLY|LITE) (.+)$/.exec(line);
+  const match=/^BADGE_INFO (0\.(?:[3456789]|10|11|12|13|14)\.\d+) (240|360|410|412|466|480) (READY|RADAR_ONLY|LITE) (.+)$/.exec(line);
+  if(match&&(match[2]==='410'||match[4]==='Waveshare ESP32-S3-Touch-AMOLED-2.06')&&(match[2]!=='410'||match[4]!=='Waveshare ESP32-S3-Touch-AMOLED-2.06'||match[3]!=='READY'||!firmwareAtLeast(match[1],'0.14.9')))return null;
   if(match&&match[2]==='412'&&(match[4]!=='Seeed SenseCAP Watcher'||!firmwareAtLeast(match[1],'0.13.29')))return null;
   if(match&&match[2]==='480'&&(match[4]!=='Elecrow CrowPanel 2.1 Rotary'||!firmwareAtLeast(match[1],'0.13.20')))return null;
   if(match&&match[2]==='240'&&!firmwareAtLeast(match[1],'0.9.2'))return null;
