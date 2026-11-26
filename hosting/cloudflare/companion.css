@@ -1,0 +1,3 @@
+html:not([data-companion-view="beta"]) #install,
+#clock-sync-panel,
+[data-board]:not([data-board="waveshare_p4_knob"]):not([data-board="guition_185_beta"]) { display: none !important; }

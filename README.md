@@ -1,6 +1,6 @@
 # Dragon Detector release flasher
 
-A separate USB installer hosted on GitHub Pages.
+The Dragon Detector USB installer, hosted on GitHub Pages. The existing [Cloudflare address](https://valleytech-dragon-detector.pages.dev/) opens this same installer so older links follow the current release automatically.
 
 [Open the flasher](https://valleytechsolutions.github.io/Dragon-Detector-Flasher/) · [Firmware releases](https://github.com/valleytechsolutions/Dragon-Detector/releases)
 
@@ -10,7 +10,9 @@ Choose the exact board printed on your device, select Update or Fresh installati
 
 The Pages workflow checks the latest official Dragon Detector release every 30 minutes, and can also be run from Actions. GitHub may delay scheduled runs. It validates each release ZIP against the release checksum list, then checks the board, version, flash layout and individual binary checksums. The browser verifies the selected installation files again before enabling installation. Failed builds leave the previously published site available.
 
-Firmware comes from the published release files. The P4 Knob is excluded. Models without published release packages remain available through the [main flasher](https://valleytech-dragon-detector.pages.dev/).
+Firmware comes from the published release files. The P4 Knob is excluded. Models without published release packages remain available through the [separate beta installers](https://valleytech-dragon-detector.pages.dev/companion#install).
+
+[Badge Studio](https://valleytech-dragon-detector.pages.dev/companion#studio), [Theme Creator](https://valleytech-dragon-detector.pages.dev/companion#theme-studio) and [hardware details and purchase links](https://valleytech-dragon-detector.pages.dev/companion#buy-hardware) remain on Cloudflare. Artwork uploads are a separate step after firmware installation and clock setup; close the installer's USB connection before connecting an editor.
 
 The flasher uses ESP Web Tools 10.4.0 and the existing Dragon Detector USB clock protocol. The installer and protocol modules retain their upstream notices. Release packages include their own license files.
 

@@ -24,6 +24,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Check hardware mismatch protection
         run: node tests/hardware-check.mjs
+      - name: Check existing Cloudflare links
+        run: node tests/cloudflare-routing.mjs
       - name: Prepare latest official release
         id: build
         run: python tools/build_site.py --published https://valleytechsolutions.github.io/Dragon-Detector-Flasher/

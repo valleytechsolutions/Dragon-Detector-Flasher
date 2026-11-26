@@ -17,6 +17,7 @@
       <h1>Your board.<br><span>The official release.</span></h1>
       <p class="lede">Install Dragon Detector and set its clock over USB. Choose the exact model printed on your device.</p>
       <p id="release">Checking release…</p>
+      <nav class="links" aria-label="Editors and hardware"><a href="https://valleytech-dragon-detector.pages.dev/companion#studio">Badge Studio</a><a href="https://valleytech-dragon-detector.pages.dev/companion#theme-studio">Theme Creator</a><a href="https://valleytech-dragon-detector.pages.dev/companion#buy-hardware">Hardware &amp; purchase links</a></nav>
     </section>
     <section class="installer" aria-labelledby="install-heading">
       <h2 id="install-heading">Install firmware</h2>
@@ -38,10 +39,10 @@
       <p id="browser-help" class="muted" hidden>USB installation needs desktop Chrome or Edge. Open this page directly in one of those browsers.</p>
     </section>
     <section class="support">
-      <div><h2>Set the clock</h2><p>Choose your model above and connect the running device. Its identity and clock are checked over USB.</p><button id="sync" class="secondary" disabled>Connect and sync clock</button></div>
-      <div><h2>Connection help</h2><p>Use a USB data cable and close other serial monitors. For a blank StopWatch after flashing, unplug USB, double-press its small power button to turn it off, then press once to start it and reconnect USB.</p><p><a href="https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers">CP210x driver ↗</a> · <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html">WCH USB driver ↗</a></p></div>
+      <div id="clock"><h2>Set the clock</h2><p>Choose your model above and connect the running device. Its identity and clock are checked over USB.</p><button id="sync" class="secondary" disabled>Connect and sync clock</button></div>
+      <div id="connection-help"><h2>Connection help</h2><p>Use a USB data cable and close other serial monitors. For a blank StopWatch after flashing, unplug USB, double-press its small power button to turn it off, then press once to start it and reconnect USB.</p><p><a href="https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers">CP210x driver ↗</a> · <a href="https://www.wch-ic.com/downloads/CH343SER_EXE.html">WCH USB driver ↗</a></p></div>
     </section>
-    <details><summary>Release source and supported hardware</summary><p>Firmware comes from the latest published Dragon Detector GitHub release. The site checks for updates every 30 minutes. Each package and installer file is checked against its SHA-256 checksum before publication.</p><p>The P4 Knob uses its existing flasher. Guition beta and Tuya T5-E1 downloads are available through the main site until they have GitHub release packages.</p><p><a href="https://valleytech-dragon-detector.pages.dev/#hardware">Hardware details and purchase links ↗</a> · <a href="https://valleytech-dragon-detector.pages.dev/">Main flasher, Badge Studio and theme creator ↗</a></p></details>
+    <details><summary>Release source and supported hardware</summary><p>Firmware comes from the latest published Dragon Detector GitHub release. The site checks for updates every 30 minutes. Each package and installer file is checked against its SHA-256 checksum before publication.</p><p>The existing Cloudflare address opens this same installer. Badge Studio and Theme Creator upload artwork separately after installation; finish clock setup and close the USB connection before opening an editor.</p><p><a href="https://valleytech-dragon-detector.pages.dev/companion?board=waveshare_p4_knob#install">P4 Knob installer ↗</a> · <a href="https://valleytech-dragon-detector.pages.dev/companion#install">Other separate beta installers ↗</a> · <a href="https://valleytech-dragon-detector.pages.dev/guides/FLASHING.html">Flashing guide ↗</a></p></details>
   </main>
   <footer><a href="https://github.com/valleytechsolutions/Dragon-Detector-Flasher">Flasher source</a><span id="updated"></span></footer>
   <noscript>Enable JavaScript to select your board and use the USB installer.</noscript>
