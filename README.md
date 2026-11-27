@@ -10,7 +10,7 @@ Choose the exact board printed on your device, select Update or Fresh installati
 
 The Pages workflow checks the latest official Dragon Detector release every 30 minutes, and can also be run from Actions. GitHub may delay scheduled runs. It validates each release ZIP against the release checksum list, then checks the board, version, flash layout and individual binary checksums. The browser verifies the selected installation files again before enabling installation. Failed builds leave the previously published site available.
 
-Firmware comes from the published release files. The P4 Knob is excluded. Models without published release packages remain available through the [separate beta installers](https://valleytech-dragon-detector.pages.dev/companion#install).
+Firmware comes from the published release files. The [Waveshare P4 Knob](https://valleytechsolutions.github.io/Dragon-Detector-Flasher/?board=waveshare_p4_knob) uses its own 0.14.12 Beta 2 GitHub prerelease. Portal and Room Motion are pending. Models without packages here remain available through the [separate beta installers](https://valleytech-dragon-detector.pages.dev/companion#install).
 
 [Badge Studio](https://valleytech-dragon-detector.pages.dev/companion#studio), [Theme Creator](https://valleytech-dragon-detector.pages.dev/companion#theme-studio) and [hardware details and purchase links](https://valleytech-dragon-detector.pages.dev/companion#buy-hardware) remain on Cloudflare. Artwork uploads are a separate step after firmware installation and clock setup; close the installer's USB connection before connecting an editor.
 

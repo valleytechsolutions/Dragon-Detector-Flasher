@@ -1,6 +1,6 @@
 (() => {
   const current = new URL(location.href);
-  const separate = ['waveshare_p4_knob', 'guition_185_beta', 't5-e1'].includes(current.searchParams.get('board'));
+  const separate = ['guition_185_beta', 't5-e1'].includes(current.searchParams.get('board'));
   const companions = new Map([
     ['#studio', '#studio'], ['#badge-studio', '#studio'],
     ['#theme-studio', '#theme-studio'], ['#theme-creator', '#theme-studio'],

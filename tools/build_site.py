@@ -18,7 +18,15 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 RELEASES = "https://github.com/valleytechsolutions/Dragon-Detector/releases"
 MIB = 1024 * 1024
-EXCLUDED = {"waveshare_p4_knob"}
+P4 = "waveshare_p4_knob"
+P4_TAG = "v0.14.12-p4-beta.2"
+P4_VERSION = "0.14.12"
+P4_LAYOUTS = {
+    "update": [("firmware.bin", 0x10000)],
+    "update-app1": [("firmware.bin", 0x610000)],
+    "factory": [("bootloader.bin", 0x2000), ("partitions.bin", 0x8000),
+                ("boot_app0.bin", 0xe000), ("firmware.bin", 0x10000), ("littlefs.bin", 0xc10000)],
+}
 
 
 def download(url, limit=64 * MIB):
@@ -62,13 +70,20 @@ def unpack(blob, digest, board, version, destination):
         checksums = sums(archive.read("SHA256SUMS.txt"))
         payloads = {}
         manifests = {}
-        for mode in ("update", "factory"):
+        if board == P4 and (info["flash_size"] != 32 * MIB or info.get("release_tag") != P4_TAG):
+            raise ValueError("P4 package capacity or prerelease tag mismatch")
+        for mode in P4_LAYOUTS if board == P4 else ("update", "factory"):
             manifest = json.loads(archive.read(mode + ".json"))
             if manifest["version"] != version or len(manifest["builds"]) != 1:
                 raise ValueError(f"{board}: manifest version mismatch")
             build = manifest["builds"][0]
-            if build["chipFamily"] != "ESP32-S3":
+            if build["chipFamily"] != ("ESP32-P4" if board == P4 else "ESP32-S3"):
                 raise ValueError(f"{board}: unsupported processor")
+            if board == P4 and ([(p["path"], p["offset"]) for p in build["parts"]] != P4_LAYOUTS[mode]
+                                or manifest.get("release_channel") != "beta"
+                                or manifest.get("beta_iteration") != 2
+                                or manifest.get("application_sha256") != checksums.get("firmware.bin")):
+                raise ValueError("P4 beta manifest has incorrect slot, channel or application checksum")
             occupied = []
             names = set()
             for part in build["parts"]:
@@ -81,6 +96,8 @@ def unpack(blob, digest, board, version, destination):
                     raise ValueError(f"{board}/{name}: part checksum mismatch")
                 if type(offset) is not int or offset < 0 or offset + len(data) > info["flash_size"]:
                     raise ValueError(f"{board}/{name}: invalid flash range")
+                if board == P4 and name == "firmware.bin" and len(data) > 6 * MIB:
+                    raise ValueError("P4 application exceeds its slot")
                 if any(offset < end and offset + len(data) > start for start, end in occupied):
                     raise ValueError(f"{board}: overlapping flash regions")
                 occupied.append((offset, offset + len(data)))
@@ -116,8 +133,13 @@ def build(output, published=None):
     base = f"{RELEASES}/download/{tag}/"
     checksum_data = download(base + "SHA256SUMS.txt", MIB)
     index = sums(checksum_data)
+    p4_base = f"{RELEASES}/download/{P4_TAG}/"
+    p4_asset = f"dragon-detector-{P4}-{P4_VERSION}.zip"
+    p4_checksum_data = download(p4_base + "SHA256SUMS.txt", MIB)
+    p4_digest = sums(p4_checksum_data)[p4_asset]
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     identity = {"tag": tag, "checksum_sha256": hashlib.sha256(checksum_data).hexdigest(), "site_revision": revision}
+    identity["p4_beta"] = {"tag": P4_TAG, "checksum_sha256": hashlib.sha256(p4_checksum_data).hexdigest()}
     if published:
         try:
             previous = json.loads(download(published.rstrip("/") + "/catalog.json", MIB))
@@ -131,7 +153,7 @@ def build(output, published=None):
     packages = []
     for asset, digest in index.items():
         found = re.fullmatch(r"dragon-detector-([a-z0-9_]+)-" + re.escape(tag[1:]) + r"\.zip", asset)
-        if found and found[1] not in EXCLUDED:
+        if found and found[1] != P4:
             packages.append((found[1], asset, digest))
     if not packages:
         raise ValueError("Release contains no supported board packages")
@@ -148,6 +170,10 @@ def build(output, published=None):
 
     with ThreadPoolExecutor(max_workers=3) as pool:
         boards = list(pool.map(prepare, sorted(packages)))
+    p4_path = f"firmware/{P4_TAG}/{P4}"
+    p4 = unpack(download(p4_base + p4_asset), p4_digest, P4, P4_VERSION, output / p4_path)
+    p4.update(path=p4_path, archive_url=p4_base + p4_asset, archive_sha256=p4_digest, release_tag=P4_TAG)
+    boards.append(p4)
     resources = {}
     for board in boards:
         resource = board["manifests"]["update"].get("sdResources")

@@ -1,6 +1,7 @@
 import {firmwareAtLeast,knownFirmware} from './firmware-version.js?v=0.14.9';
 import {resourceSetup} from "./sd-resources.js?v=0.14.9";
 export const boardProfiles=Object.freeze({
+  waveshare_p4_knob:{name:'Waveshare P4 Knob AMOLED 1.75X · Beta 2',firmwareName:'Waveshare ESP32-P4-Knob-Touch-AMOLED-1.75',size:466,display:'AMOLED · touch and rotary dial · RTC · microSD',filesystemOffset:0xc10000},
   waveshare_206:{name:'Waveshare ESP32-S3-Touch-AMOLED-2.06 · Preview',firmwareName:'Waveshare ESP32-S3-Touch-AMOLED-2.06',size:410,height:502,display:'Rectangular AMOLED · touch · RTC · microSD',filesystemOffset:0xc10000,minVersion:'0.14.9',experimental:true,storage:'32 MB flash · 8 MB PSRAM · optional FAT32 microSD.'},
   waveshare_143c:{name:'Waveshare ESP32-S3-Touch-AMOLED-1.43C · Beta',firmwareName:'Waveshare ESP32-S3-Touch-AMOLED-1.43C',size:466,display:'Round AMOLED · touch · BOOT navigation · speaker connector',filesystemOffset:0x410000,minVersion:'0.14.7',experimental:true,storage:'8 MB flash · 8 MB PSRAM · 3.94 MiB shared user storage. No SD slot or SD controls. Save captures internally and download over USB. No hardware RTC or GPS.',features:'Full radar, built-in themes plus an optional personal design, badge, clocks, locksport timers, radio tools and BLE Lab. Touch plus one-button navigation: a short BOOT press steps Radar, Main menu, Utilities, Badge and Clock; hold it for the main menu; on timers press to start or pause and double-press for Lap/Finish or Reset. PWR is the hardware power key. Sound needs a speaker on the speaker connector. Battery level is estimated from cell voltage. USB or saved-Wi-Fi clock setup after a full power-off. Only for the 1.43C / 1.43C-EN; the 16 MB 1.43 / 1.43-B uses different wiring. Hardware checks are listed in the board guide.'},
   guition_185_beta:{name:'Guition / Surenoo JC3636W518 · Beta 1',firmwareName:'Guition / Surenoo JC3636W518 Beta 1',size:360,display:'Round LCD · touch · physically unverified Beta 1',filesystemOffset:0xc10000,minVersion:'0.14.2',experimental:true,releaseChannel:'beta',betaIteration:1,storage:'16 MB flash · PSRAM required · 3.94 MiB shared user storage · optional FAT32 microSD and vendor pack. Separate beta package; physical validation is pending.',features:'Beta 1 for the exact JC3636W518 sold by Guition / Surenoo. Manufacturer display initialization with a conservative 20 MHz QSPI clock. Full software interface, badge, themes, clocks, radio tools and BLE Lab; screen, touch, audio and SD are not physically verified. Software clock, no external RTC or GPS/wardrive. The existing Spotpear profile remains a separate choice.'},
@@ -21,9 +22,19 @@ export function supportsBadge(board){return !!boardProfiles[board]&&!boardProfil
 export function connectedProfile(info){
   return Object.entries(boardProfiles).find(([,p])=>(p.firmwareName===info?.board||p.legacyNames?.includes(info?.board))&&p.size===info?.size)?.[0]||null;
 }
-export function validateManifest(data,board,mode){
+export function validateManifest(data,board,mode,slot=0){
   const profile=boardProfiles[board];
   if(!profile||!['factory','update'].includes(mode))throw new Error('Choose a supported board and installation type.');
+  if(board==='waveshare_p4_knob'){
+    if((slot!==0&&slot!==1)||(mode==='factory'&&slot!==0))throw new Error('Invalid P4 application slot.');
+    const parts=mode==='factory'?[['bootloader.bin',0x2000],['partitions.bin',0x8000],['boot_app0.bin',0xe000],['firmware.bin',0x10000],['littlefs.bin',0xc10000]]:[['firmware.bin',slot===1?0x610000:0x10000]];
+    const build=data?.builds?.[0];
+    if(data?.name!==`Dragon Detector — ${profile.firmwareName} (${mode})`||data.version!=='0.14.12'||data.release_channel!=='beta'||data.beta_iteration!==2||
+       data.new_install_prompt_erase!==(mode==='factory')||data.new_install_improv_wait_time!==0||data.builds?.length!==1||build?.chipFamily!=='ESP32-P4'||
+       build.parts?.length!==parts.length||parts.some(([path,offset],i)=>build.parts[i]?.path!==path||build.parts[i]?.offset!==offset))
+      throw new Error('The manifest does not match the P4 Knob Beta 2 and selected app slot.');
+    return data;
+  }
   const expected=[['bootloader.bin',0],['partitions.bin',0x8000],['boot_app0.bin',0xe000],['firmware.bin',0x10000]];
   if(board==='waveshare_206'&&!firmwareAtLeast(data?.version,profile.minVersion))throw new Error('Waveshare AMOLED 2.06 requires its matching 0.14.9 or newer manifest.');
   if(mode==='factory')expected.push(['littlefs.bin',profile.filesystemOffset]);

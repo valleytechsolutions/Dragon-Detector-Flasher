@@ -28,7 +28,14 @@ export function clockInstallDialogClass(Base){
           this._error='The installer manifest changed after verification. Reload this page before installing.';
           return;
         }
-        this._manifest.beforeFlash=loader=>checkFlashCapacity(loader,this.expectedFlashMB,this.boardName);
+        this._manifest.beforeFlash=async loader=>{
+          if(this.expectedP4Revision!==null&&this.expectedP4Revision!==undefined){
+            const revision=loader.chip?.CHIP_NAME==='ESP32-P4'&&await loader.chip.getChipRevision(loader);
+            if(!Number.isInteger(revision)||Math.floor(revision/100)!==this.expectedP4Revision)
+              throw new Error('The P4 Knob beta requires ESP32-P4 revision 3.x. Nothing was erased.');
+          }
+          await checkFlashCapacity(loader,this.expectedFlashMB,this.boardName);
+        };
       }
       // This page already selected Update or Fresh installation. Avoid a
       // contradictory second erase chooser; _startInstall enforces that mode.

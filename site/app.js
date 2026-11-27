@@ -4,6 +4,7 @@ import {completeInstallSession, syncInstalledClock} from './install-clock.js';
 import {clockResultText} from './clock-verification.js';
 import {boardProfiles, validateManifest} from './board-profiles.js';
 import {resourceSetup} from './sd-resources.js';
+import {readP4UpdateSlot} from './p4-install.js';
 
 const $ = id => document.getElementById(id);
 customElements.define('release-install-dialog', clockInstallDialogClass(installerModule.EwtInstallDialog));
@@ -58,7 +59,9 @@ async function checkSelection() {
       ? 'Dial has a rotary ring and a 240 × 240 LCD. For the yellow-and-blue-button StopWatch, select StopWatch C152.'
       : selected.id === 'waveshare_206'
         ? 'Preview for the rectangular AMOLED 2.06. Physical validation is pending.'
-        : '';
+        : selected.id === 'waveshare_p4_knob'
+          ? '0.14.12 Beta 2 for ESP32-P4 revision 3.x. Includes the animated launcher, MP3, voice recording, USB Disk and Biscuit/JCMK node modes. Portal and Room Motion are pending. Use native USB for Update.'
+          : '';
   $('confirm-text').textContent = 'My device is ' + selected.name + '.';
   $('download').href = selected.archive_url;
   $('checksums').href = selected.path + '/SHA256SUMS.txt';
@@ -115,15 +118,20 @@ $('install').addEventListener('click', async () => {
   let port;
   try {
     port = await navigator.serial.requestPort();
+    const p4 = selected.id === 'waveshare_p4_knob';
+    let key = mode;
+    if (p4 && mode === 'update' && await readP4UpdateSlot(port) === 1) key = 'update-app1';
+    if (p4) validateManifest(selected.manifests[key], selected.id, mode, key === 'update-app1' ? 1 : 0);
     await port.open({baudRate: 115200, bufferSize: 8192});
     const dialog = document.createElement('release-install-dialog');
     dialog.port = port;
     dialog.installMode = mode;
     dialog.autoClock = autoClock;
-    dialog.expectedManifest = selected.manifests[mode];
+    dialog.expectedManifest = selected.manifests[key];
     dialog.expectedFlashMB = selected.flash_mb;
+    dialog.expectedP4Revision = p4 ? 3 : null;
     dialog.boardName = selected.name;
-    dialog.manifestPath = selected.path + '/' + mode + '.json';
+    dialog.manifestPath = selected.path + '/' + key + '.json';
     dialog.addEventListener('closed', async () => {
       const succeeded = dialog.installSucceeded;
       try {

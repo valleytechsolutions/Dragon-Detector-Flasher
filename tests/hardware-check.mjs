@@ -2,6 +2,21 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {checkFlashCapacity} from '../site/hardware-check.js';
 import {clockInstallDialogClass} from '../site/clock-install-dialog.js';
+import {validateManifest} from '../site/board-profiles.js';
+import {p4UpdateSlot} from '../site/p4-install.js';
+
+const p4 = 'waveshare_p4_knob';
+const layout = (revision, running, boot = running) => `P4_LAYOUT layout=1 revision=${revision} running=${running} boot=${boot}`;
+assert.equal(p4UpdateSlot(layout(302, 0x10000)), 0);
+assert.equal(p4UpdateSlot(layout(302, 0x610000)), 1);
+for (const value of [layout(102, 0x10000), layout(302, 0x10000, 0x610000), layout(302, 0x2000), 'UNKNOWN'])
+  assert.throws(() => p4UpdateSlot(value));
+const p4Update = {name:'Dragon Detector — Waveshare ESP32-P4-Knob-Touch-AMOLED-1.75 (update)',
+  version:'0.14.12', release_channel:'beta', beta_iteration:2, new_install_prompt_erase:false,
+  new_install_improv_wait_time:0, builds:[{chipFamily:'ESP32-P4', parts:[{path:'firmware.bin', offset:0x610000}]}]};
+assert.equal(validateManifest(p4Update,p4,'update',1), p4Update);
+assert.throws(() => validateManifest(p4Update,p4,'update',0));
+assert.throws(() => validateManifest(p4Update,'waveshare_185b','update'));
 
 const source = readFileSync(new URL('../site/vendor/esp-web-tools-10.4.0/install-dialog-im156JnI.js', import.meta.url), 'utf8');
 const start = source.indexOf('(async(e,t,i,r,s)=>');
@@ -66,6 +81,17 @@ dialog.expectedFlashMB=16;
 dialog.boardName='StopWatch C152';
 await dialog._initialize();
 assert.equal(typeof dialog._manifest.beforeFlash,'function');
+dialog.expectedP4Revision=3;
+dialog.expectedFlashMB=32;
+capacity=25;
+calls=[];
+const p4Loader=new Es();
+p4Loader.chip={CHIP_NAME:'ESP32-P4', getChipRevision:async()=>102};
+await assert.rejects(dialog._manifest.beforeFlash(p4Loader), /revision 3/);
+assert.deepEqual(calls,[]);
+p4Loader.chip.getChipRevision=async()=>302;
+await dialog._manifest.beforeFlash(p4Loader);
+assert.deepEqual(calls,['read-id']);
 dialog.downloaded={name:'Dial'};
 await dialog._initialize();
 assert.equal(dialog._state,'ERROR');
